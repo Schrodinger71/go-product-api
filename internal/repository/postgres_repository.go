@@ -53,7 +53,7 @@ func (r *postgresRepository) GetProductRepository() ProductRepository {
 	return &productRepository{db: r.db}
 }
 
-// GetUserRepository возвращает UserRepository  
+// GetUserRepository возвращает UserRepository
 func (r *postgresRepository) GetUserRepository() UserRepository {
 	return &userRepository{db: r.db}
 }
