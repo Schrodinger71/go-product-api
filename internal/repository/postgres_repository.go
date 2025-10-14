@@ -3,14 +3,17 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"go-product-api/internal/models"
+	"go-product-api/internal/config"
+	"log"
 )
 
 type postgresRepository struct {
-	db *sql.DB
+	Products ProductRepository
+	Users    UserRepository
+	db       *sql.DB
 }
 
-func NewPostgresRepository(dsn string) (ProductRepository, error) {
+func NewPostgresRepository(dsn string) (PostgresRepository, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
@@ -22,7 +25,21 @@ func NewPostgresRepository(dsn string) (ProductRepository, error) {
 		return nil, err
 	}
 
-	err = createTable(db)
+	err = createTableProduct(db)
+	if err != nil {
+		return nil, err
+	}
+
+	err = createTableUsers(db)
+	if err != nil {
+		if err.Error() == "table already exists" {
+			fmt.Println("✅ Table users already exists")
+		} else {
+			return nil, err
+		}
+	}
+
+	err = createAdminUser(db)
 	if err != nil {
 		return nil, err
 	}
@@ -31,8 +48,18 @@ func NewPostgresRepository(dsn string) (ProductRepository, error) {
 	return &postgresRepository{db: db}, nil
 }
 
+// GetProductRepository возвращает ProductRepository
+func (r *postgresRepository) GetProductRepository() ProductRepository {
+	return &productRepository{db: r.db}
+}
+
+// GetUserRepository возвращает UserRepository
+func (r *postgresRepository) GetUserRepository() UserRepository {
+	return &userRepository{db: r.db}
+}
+
 // Создаём таблицу products, если она не существует
-func createTable(db *sql.DB) error {
+func createTableProduct(db *sql.DB) error {
 	query := `
 	CREATE TABLE IF NOT EXISTS products (
 		id SERIAL PRIMARY KEY,
@@ -48,112 +75,47 @@ func createTable(db *sql.DB) error {
 	return err
 }
 
-func (r *postgresRepository) GetAll() ([]models.Product, error) {
-	query := `SELECT id, name, description, stock, price, created_at, updated_at FROM products ORDER BY id DESC`
-	rows, err := r.db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var products []models.Product
-	for rows.Next() {
-		var product models.Product
-		err := rows.Scan(
-			&product.ID,
-			&product.Name,
-			&product.Description,
-			&product.Stock,
-			&product.Price,
-			&product.CreatedAt,
-			&product.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		products = append(products, product)
-	}
-
-	return products, nil
-}
-
-func (r *postgresRepository) GetByID(id uint) (*models.Product, error) {
-	query := `SELECT id, name, description, stock, price, created_at, updated_at FROM products WHERE id = $1`
-	row := r.db.QueryRow(query, id)
-
-	var product models.Product
-	err := row.Scan(
-		&product.ID,
-		&product.Name,
-		&product.Description,
-		&product.Stock,
-		&product.Price,
-		&product.CreatedAt,
-		&product.UpdatedAt,
-	)
-	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("product not found")
-	} else if err != nil {
-		return nil, err
-	}
-
-	return &product, nil
-}
-
-func (r *postgresRepository) Create(product *models.Product) error {
+func createTableUsers(db *sql.DB) error {
 	query := `
-        INSERT INTO products (name, description, stock, price) 
-        VALUES ($1, $2, $3, $4) 
-        RETURNING id, created_at, updated_at
-    `
+	CREATE TABLE IF NOT EXISTS users (
+		id SERIAL PRIMARY KEY,
+		name VARCHAR(255) NOT NULL,
+		email VARCHAR(255) NOT NULL,
+		password VARCHAR(255) NOT NULL,
+		is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		UNIQUE(email)
+	)`
 
-	err := r.db.QueryRow(
-		query,
-		product.Name,
-		product.Description,
-		product.Stock,
-		product.Price,
-	).Scan(&product.ID, &product.CreatedAt, &product.UpdatedAt)
-
+	_, err := db.Exec(query)
 	return err
 }
 
-func (r *postgresRepository) Update(product *models.Product) error {
+func createAdminUser(db *sql.DB) error {
+	adminEmail := config.GetsEnv("ADMIN_EMAIL", "admin@example.com")
+	adminName := config.GetsEnv("ADMIN_NAME", "Administrator")
+
+	// TODO: ПОМЕНЯТЬ НА СОЛЬ, ПАРОЛИ НЕ ХРАНЯТ В ОТКРЫТОМ ВИДЕ!!!!!!
+	adminPassword := config.GetsEnv("ADMIN_PASSWORD", "321admin123")
+
 	query := `
-        UPDATE products 
-        SET name = $1, description = $2, stock = $3, price = $4, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $5
-        RETURNING updated_at
-    `
+    INSERT INTO users (name, email, password, is_admin) 
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (email) DO UPDATE SET
+        name = EXCLUDED.name,
+        password = EXCLUDED.password,
+        is_admin = EXCLUDED.is_admin,
+        updated_at = CURRENT_TIMESTAMP`
 
-	err := r.db.QueryRow(
-		query,
-		product.Name,
-		product.Description,
-		product.Stock,
-		product.Price,
-		product.ID,
-	).Scan(&product.UpdatedAt)
-
-	if err == sql.ErrNoRows {
-		return fmt.Errorf("product not found")
-	}
-	return err
-}
-
-func (r *postgresRepository) Delete(id uint) error {
-	query := `DELETE FROM products WHERE id = $1`
-	result, err := r.db.Exec(query, id)
+	result, err := db.Exec(query, adminName, adminEmail, adminPassword, true)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create admin user: %v", err)
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("product not found")
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected > 0 {
+		log.Printf("✅ Admin user created/updated: %s", adminEmail)
 	}
 
 	return nil

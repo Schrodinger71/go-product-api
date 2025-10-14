@@ -1,0 +1,199 @@
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+.container { 
+    max-width: 800px; 
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+.product-form { 
+    background: linear-gradient(135deg, #8B5FBF 0%, #6A3093 100%);
+    padding: 25px; 
+    border-radius: 12px; 
+    margin-bottom: 25px; 
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.form-group { 
+    margin-bottom: 15px;
+}
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+label { 
+    display: block; 
+    margin-bottom: 8px; 
+    font-weight: 600;
+    color: #f8f9fa;
+    font-size: 14px;
+}
+input, textarea { 
+    width: 100%; 
+    padding: 10px 12px; 
+    border: 2px solid rgba(255, 255, 255, 0.3); 
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+input::placeholder, textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #FFD700;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+}
+button { 
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #2c3e50; 
+    border: none; 
+    padding: 12px 30px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    display: block;
+    margin: 20px auto 0;
+}
+button:hover { 
+    background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+.product-list { 
+    margin-top: 25px; 
+}
+.product-item { 
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #E8DCFF; 
+    padding: 20px; 
+    margin-bottom: 15px; 
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.product-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    border-color: #8B5FBF;
+}
+.delete-btn { 
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+.delete-btn:hover { 
+    background: linear-gradient(135deg, #EE5A52 0%, #D63031 100%);
+    transform: translateY(-1px);
+}
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.2em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+h2 {
+    color: #f8f9fa;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+    text-align: center;
+}
+.product-item h3 {
+    color: #6A3093;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+.product-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.product-meta p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+.product-description {
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.actions {
+    text-align: right;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #E8DCFF;
+}
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6A3093;
+    font-weight: 600;
+}
+.nav-btn {
+    background: linear-gradient(135deg, #8B5FBF 0%, #6A3093 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+.nav-btn:hover {
+    background: linear-gradient(135deg, #6A3093 0%, #5A2D82 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
+    color: white;
+    text-decoration: none;
+}
+.logout-btn {
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+}
+.logout-btn:hover {
+    background: linear-gradient(135deg, #EE5A52 0%, #D63031 100%);
+}
