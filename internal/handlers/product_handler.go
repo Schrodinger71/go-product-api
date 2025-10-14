@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"go-product-api/internal/middleware"
 	"go-product-api/internal/models"
 	"go-product-api/internal/repository"
 	"html/template"
@@ -25,14 +26,15 @@ func NewProductHandler(repo repository.ProductRepository) *ProductHandler {
 
 // HTML страница
 func (h *ProductHandler) IndexPage(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	// Проверяем аутентификацию
+	if !middleware.IsAdmin(r.Context()) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	products, err := h.repo.GetAll()
 	if err != nil {
-		http.Error(w, "Error retrieving products: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error fetching products", http.StatusInternalServerError)
 		return
 	}
 
@@ -56,8 +58,13 @@ func (h *ProductHandler) GetProductsAPI(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(products)
 }
 
-// API: Создать товар
+// API: Создать товар только для админа
 func (h *ProductHandler) CreateProductAPI(w http.ResponseWriter, r *http.Request) {
+	if !middleware.IsAdmin(r.Context()) {
+		http.Error(w, "Admin access required", http.StatusForbidden)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -100,6 +107,11 @@ func (h *ProductHandler) CreateProductAPI(w http.ResponseWriter, r *http.Request
 
 // API: Удалить товар по ID
 func (h *ProductHandler) DeleteProductAPI(w http.ResponseWriter, r *http.Request) {
+	if !middleware.IsAdmin(r.Context()) {
+		http.Error(w, "Admin access required", http.StatusForbidden)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return

@@ -2,6 +2,13 @@ package repository
 
 import "go-product-api/internal/models"
 
+type PostgresRepository interface {
+	GetProductRepository() ProductRepository
+	GetUserRepository() UserRepository
+	// Закрыть соединение с базой данных
+	Close() error
+}
+
 type ProductRepository interface {
 	// Получить все продукты
 	GetAll() ([]models.Product, error)
@@ -17,7 +24,24 @@ type ProductRepository interface {
 
 	// Удалить продукт по ID
 	Delete(id uint) error
+}
 
-	// Закрыть соединение с базой данных
-	Close() error
+type UserRepository interface {
+	// Получить все пользователи
+	GetAll() ([]models.User, error)
+
+	// Получить пользователя по ID
+	GetByID(id uint) (*models.User, error)
+
+	// Получить пользователя по email
+	GetByEmail(email string) (*models.User, error)
+
+	// Создать нового пользователя
+	Create(user *models.User) error
+
+	// Обновить существующего пользователя
+	Update(user *models.User) error
+
+	// Удалить пользователя по ID
+	Delete(id uint) error
 }
