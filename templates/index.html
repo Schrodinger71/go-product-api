@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🛍️ Product Management</h1>
+        
+        <!-- Форма создания товара -->
+        <div class="product-form">
+            <h2>Create New Product</h2>
+            <form action="/api/products/create" method="POST">
+                <div class="form-group full-width">
+                    <label for="name">Product Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter product name" required>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="2" placeholder="Brief product description"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Price (₽)</label>
+                        <input type="number" id="price" name="price" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock">Stock Quantity</label>
+                        <input type="number" id="stock" name="stock" placeholder="0" required>
+                    </div>
+                </div>
+                
+                <button type="submit">➕ Create Product</button>
+            </form>
+        </div>
+
+        <!-- Список товаров -->
+        <div class="product-list">
+            <h2 style="color: #2c3e50; text-align: center;">Products List</h2>
+            {{range .}}
+            <div class="product-item">
+                <h3>{{.Name}}</h3>
+                <div class="product-description">
+                    <strong>Description:</strong> {{.Description}}
+                </div>
+                <div class="product-meta">
+                    <p><strong>Price:</strong> ${{printf "%.2f" .Price}}</p>
+                    <p><strong>Stock:</strong> {{.Stock}} units</p>
+                    <p><strong>ID:</strong> {{.ID}}</p>
+                    <p><strong>Created:</strong> {{.CreatedAt.Format "Jan 02, 2006"}}</p>
+                </div>
+                <div class="actions">
+                    <form action="/api/products/delete/{{.ID}}" method="POST" style="display: inline;">
+                        <button type="submit" class="delete-btn" onclick="return confirm('Delete {{.Name}}?')">🗑️ Delete</button>
+                    </form>
+                </div>
+            </div>
+            {{else}}
+            <div class="product-item" style="text-align: center; color: #6c757d;">
+                <p>No products found. Create your first product above! 📦</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</body>
+</html>

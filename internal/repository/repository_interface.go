@@ -17,4 +17,7 @@ type ProductRepository interface {
 
 	// Удалить продукт по ID
 	Delete(id uint) error
+
+	// Закрыть соединение с базой данных
+	Close() error
 }
