@@ -126,6 +126,12 @@ func (r *postgresRepository) Update(product *models.Product) error {
         RETURNING updated_at
     `
 
+	i := 0
+
+	for i < 10000000 {
+		i++
+	}
+
 	err := r.db.QueryRow(
 		query,
 		product.Name,
