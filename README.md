@@ -2,7 +2,7 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.25.2-00ADD8?logo=go)](https://golang.org)
 [![CI Status](https://github.com/Schrodinger71/go-product-api/actions/workflows/go-analysis.yml/badge.svg)](https://github.com/Schrodinger71/go-product-api/actions)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-336791?logo=postgresql)](https://www.postgresql.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)](https://www.postgresql.org)
 [![Redis](https://img.shields.io/badge/Redis-7+-DC382D?logo=redis)](https://redis.io)
 
 RESTful API сервис для управления товарами с кэшированием, написанный на Go.
