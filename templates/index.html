@@ -8,7 +8,18 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛍️ Product Management</h1>
+
+        <!-- Навигационная панель -->
+        <div class="header">
+            <h1>🛍️ Product Management</h1>
+            <div class="nav-buttons">
+                <div class="user-info">
+                    👤 {{.UserName}}
+                </div>
+                <a href="/admin/users" class="nav-btn">👥 Manage Users</a>
+                <a href="/logout" class="nav-btn logout-btn">🚪 Logout</a>
+            </div>
+        </div>
         
         <!-- Форма создания товара -->
         <div class="product-form">
@@ -42,7 +53,7 @@
         <!-- Список товаров -->
         <div class="product-list">
             <h2 style="color: #2c3e50; text-align: center;">Products List</h2>
-            {{range .}}
+            {{range .Products}}
             <div class="product-item">
                 <h3>{{.Name}}</h3>
                 <div class="product-description">

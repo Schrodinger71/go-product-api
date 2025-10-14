@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #E8DCFF;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #6A3093;
+            font-weight: 600;
+        }
+        .nav-btn {
+            background: linear-gradient(135deg, #8B5FBF 0%, #6A3093 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .nav-btn:hover {
+            background: linear-gradient(135deg, #6A3093 0%, #5A2D82 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        .back-btn {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        }
+        .logout-btn {
+            background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+        }
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #EE5A52 0%, #D63031 100%);
+        }
+        .user-form {
+            background: linear-gradient(135deg, #8B5FBF 0%, #6A3093 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .user-item {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #E8DCFF;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        .user-item.admin {
+            border-color: #FFD700;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+        }
+        .admin-badge {
+            background: #FFD700;
+            color: #2c3e50;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Навигационная панель -->
+        <div class="header">
+            <h1>👥 User Management</h1>
+            <div class="nav-buttons">
+                <div class="user-info">
+                    👤 {{.UserName}}
+                </div>
+                <a href="/" class="nav-btn back-btn">📦 Products</a>
+                <a href="/logout" class="nav-btn logout-btn">🚪 Logout</a>
+            </div>
+        </div>
+
+        <!-- Форма создания пользователя -->
+        <div class="user-form">
+            <h2>Create New User</h2>
+            <form id="createUserForm">
+                <div class="form-group full-width">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter user's full name" required>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter user's email" required>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is_admin" name="is_admin" value="true">
+                    <label for="is_admin">Administrator</label>
+                </div>
+                
+                <button type="submit">➕ Create User</button>
+            </form>
+        </div>
+
+        <!-- Список пользователей -->
+        <div class="user-list">
+            <h2 style="color: #2c3e50; text-align: center;">Users List</h2>
+            {{range .Users}}
+            <div class="user-item {{if .IsAdmin}}admin{{end}}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                        <h3 style="margin: 0; display: flex; align-items: center;">
+                            {{.Name}}
+                            {{if .IsAdmin}}<span class="admin-badge">ADMIN</span>{{end}}
+                        </h3>
+                        <p style="margin: 5px 0; color: #6c757d;">{{.Email}}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 0; font-size: 12px; color: #6c757d;">
+                            ID: {{.ID}}<br>
+                            Created: {{.CreatedAt.Format "Jan 02, 2006"}}
+                        </p>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="delete-btn" onclick="deleteUser({{.ID}}, '{{.Name}}')" 
+                            {{if eq .ID $.CurrentUserID}}disabled title="Cannot delete your own account"{{end}}>
+                        🗑️ Delete
+                    </button>
+                </div>
+            </div>
+            {{else}}
+            <div class="user-item" style="text-align: center; color: #6c757d;">
+                <p>No users found. Create the first user above! 👆</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <script>
+        // Создание пользователя
+        document.getElementById('createUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const isAdminCheckbox = document.getElementById('is_admin');
+            if (isAdminCheckbox.checked) {
+                formData.append('is_admin', 'true');
+            }
+
+            try {
+                const response = await fetch('/api/users/create', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('User created successfully!');
+                    this.reset();
+                    location.reload(); // Перезагружаем страницу чтобы показать нового пользователя
+                } else {
+                    const error = await response.text();
+                    alert('Error creating user: ' + error);
+                }
+            } catch (error) {
+                alert('Network error: ' + error);
+            }
+        });
+
+        // Удаление пользователя
+        async function deleteUser(userId, userName) {
+            if (!confirm(`Are you sure you want to delete user "${userName}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/delete/${userId}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert('User deleted successfully!');
+                    location.reload();
+                } else {
+                    const error = await response.text();
+                    alert('Error deleting user: ' + error);
+                }
+            } catch (error) {
+                alert('Network error: ' + error);
+            }
+        }
+    </script>
+</body>
+</html>

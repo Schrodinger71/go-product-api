@@ -6,18 +6,60 @@ import (
 	"go-product-api/internal/middleware"
 	"go-product-api/internal/models"
 	"go-product-api/internal/repository"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
+type UsersTemplateData struct {
+	Users         []models.User
+	UserName      string
+	CurrentUserID uint
+}
+
 type UserHandler struct {
 	userRepo repository.UserRepository
+	tmpl     *template.Template
 }
 
 func NewUserHandler(userRepo repository.UserRepository) *UserHandler {
+	// Загружаем шаблон с обработкой ошибок
+	tmpl, err := template.ParseFiles("templates/users.html")
+	if err != nil {
+		fmt.Printf("❌ Error loading users template: %v\n", err)
+		tmpl = template.New("empty")
+	}
+
 	return &UserHandler{
 		userRepo: userRepo,
+		tmpl:     tmpl,
+	}
+}
+
+func (h *UserHandler) UsersPage(w http.ResponseWriter, r *http.Request) {
+	users, err := h.userRepo.GetAll()
+	if err != nil {
+		http.Error(w, "Error fetching users", http.StatusInternalServerError)
+		return
+	}
+
+	// Получаем данные текущего пользователя из контекста
+	userName := middleware.GetUserName(r.Context())
+	currentUserID := middleware.GetUserID(r.Context())
+
+	// Создаем данные для шаблона
+	data := UsersTemplateData{
+		Users:         users,
+		UserName:      userName,
+		CurrentUserID: currentUserID,
+	}
+
+	err = h.tmpl.Execute(w, data)
+	if err != nil {
+		fmt.Printf("Template execution error: %v\n", err)
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		return
 	}
 }
 

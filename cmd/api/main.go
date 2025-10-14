@@ -50,6 +50,8 @@ func main() {
 	http.HandleFunc("/api/users/create", middleware.AuthMiddleware(middleware.AdminOnlyMiddleware(userHandler.CreateUserAPI)))
 	http.HandleFunc("/api/users/delete/", middleware.AuthMiddleware(middleware.AdminOnlyMiddleware(userHandler.DeleteUserAPI)))
 
+	http.HandleFunc("/admin/users", middleware.AuthMiddleware(middleware.AdminOnlyMiddleware(userHandler.UsersPage)))
+
 	// Статические файлы
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 

@@ -99,16 +99,20 @@ func LoginHandler(userRepo repository.UserRepository) http.HandlerFunc {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 
+		fmt.Printf("🔐 Login attempt: %s\n", email)
+
 		// Ищем пользователя по email
 		user, err := userRepo.GetByEmail(email)
 		if err != nil {
+			fmt.Printf("❌ User not found: %s\n", email)
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
 
-		// TODO: ДОБАВИТЬ ХЭШИРОВАНИЕ ПАРОЛЯ
-		// НЕ ДЛЯ ПРОДА
+		// TODO: Добавить хеширование паролей!
+		// Пока просто сравниваем в открытом виде (НЕ ДЛЯ ПРОДАКШЕНА!)
 		if user.Password != password {
+			fmt.Printf("❌ Invalid password for: %s\n", email)
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
@@ -125,9 +129,11 @@ func LoginHandler(userRepo repository.UserRepository) http.HandlerFunc {
 			Expires:  time.Now().Add(24 * time.Hour),
 		})
 
+		fmt.Printf("✅ Login successful: %s (Admin: %t)\n", user.Name, user.IsAdmin)
+
 		// Возвращаем успешный ответ
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"success": true, "message": "Login successful"}`)
+		fmt.Fprintf(w, `{"success": true, "message": "Login successful", "is_admin": %t}`, user.IsAdmin)
 	}
 }
 

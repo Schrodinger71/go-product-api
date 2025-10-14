@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"go-product-api/internal/middleware"
 	"go-product-api/internal/models"
 	"go-product-api/internal/repository"
@@ -10,6 +11,11 @@ import (
 	"strconv"
 	"strings"
 )
+
+type TemplateData struct {
+	Products []models.Product
+	UserName string
+}
 
 type ProductHandler struct {
 	repo repository.ProductRepository
@@ -26,19 +32,31 @@ func NewProductHandler(repo repository.ProductRepository) *ProductHandler {
 
 // HTML страница
 func (h *ProductHandler) IndexPage(w http.ResponseWriter, r *http.Request) {
-	// Проверяем аутентификацию
-	if !middleware.IsAdmin(r.Context()) {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
 	products, err := h.repo.GetAll()
 	if err != nil {
 		http.Error(w, "Error fetching products", http.StatusInternalServerError)
 		return
 	}
 
-	h.tmpl.Execute(w, products)
+	// Получаем данные пользователя из контекста
+	userName := middleware.GetUserName(r.Context())
+	fmt.Printf("User name from context: '%s'\n", userName)
+	data := TemplateData{
+		Products: products,
+		UserName: userName,
+	}
+
+	if h.tmpl == nil {
+		http.Error(w, "Template not loaded", http.StatusInternalServerError)
+		return
+	}
+
+	err = h.tmpl.Execute(w, data)
+	if err != nil {
+		fmt.Printf("Template execution error: %v\n", err)
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		return
+	}
 }
 
 // API: Получить все товары JSON

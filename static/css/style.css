@@ -151,3 +151,49 @@ h2 {
 .actions {
     text-align: right;
 }
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #E8DCFF;
+}
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6A3093;
+    font-weight: 600;
+}
+.nav-btn {
+    background: linear-gradient(135deg, #8B5FBF 0%, #6A3093 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+.nav-btn:hover {
+    background: linear-gradient(135deg, #6A3093 0%, #5A2D82 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
+    color: white;
+    text-decoration: none;
+}
+.logout-btn {
+    background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+}
+.logout-btn:hover {
+    background: linear-gradient(135deg, #EE5A52 0%, #D63031 100%);
+}
