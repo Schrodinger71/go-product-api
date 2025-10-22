@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"go-product-api/internal/crypto"
 	"go-product-api/internal/middleware"
 	"go-product-api/internal/models"
 	"go-product-api/internal/repository"
@@ -85,10 +86,17 @@ func (h *UserHandler) CreateUserAPI(w http.ResponseWriter, r *http.Request) {
 		isAdmin = true
 	}
 
+	// Хешируем пароль перед сохранением
+	hashedPassword, err := crypto.HashPassword(password)
+	if err != nil {
+		http.Error(w, "Error hashing password: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	user := &models.User{
 		Name:     name,
 		Email:    email,
-		Password: password, // В реальности нужно хешировать!
+		Password: hashedPassword,
 		IsAdmin:  isAdmin,
 	}
 
@@ -97,7 +105,6 @@ func (h *UserHandler) CreateUserAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Возвращаем JSON ответ вместо редиректа
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,

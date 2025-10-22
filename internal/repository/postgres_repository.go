@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"go-product-api/internal/config"
+	"go-product-api/internal/crypto"
 	"log"
 )
 
@@ -96,8 +97,18 @@ func createAdminUser(db *sql.DB) error {
 	adminEmail := config.GetsEnv("ADMIN_EMAIL", "admin@example.com")
 	adminName := config.GetsEnv("ADMIN_NAME", "Administrator")
 
-	// TODO: ПОМЕНЯТЬ НА СОЛЬ, ПАРОЛИ НЕ ХРАНЯТ В ОТКРЫТОМ ВИДЕ!!!!!!
-	adminPassword := config.GetsEnv("ADMIN_PASSWORD", "321admin123")
+	defaultPassword := "321admin123"
+	adminPassword := config.GetsEnv("ADMIN_PASSWORD", defaultPassword)
+
+	// Хешируем пароль
+	hashedPassword, err := crypto.HashPassword(adminPassword)
+	if err != nil {
+		if err.Error() == "crypto/rand: read error" {
+			log.Println("❌ Failed to generate crypto password: random source error")
+			return fmt.Errorf("failed to generate secure password: %v", err)
+		}
+		return fmt.Errorf("failed to hash password: %v", err)
+	}
 
 	query := `
     INSERT INTO users (name, email, password, is_admin) 
@@ -108,13 +119,15 @@ func createAdminUser(db *sql.DB) error {
         is_admin = EXCLUDED.is_admin,
         updated_at = CURRENT_TIMESTAMP`
 
-	result, err := db.Exec(query, adminName, adminEmail, adminPassword, true)
+	result, err := db.Exec(query, adminName, adminEmail, hashedPassword, true)
 	if err != nil {
 		return fmt.Errorf("failed to create admin user: %v", err)
 	}
 
-	rowsAffected, _ := result.RowsAffected()
-	if rowsAffected > 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("⚠️  Admin user created/updated but failed to get rows affected: %v", err)
+	} else if rowsAffected > 0 {
 		log.Printf("✅ Admin user created/updated: %s", adminEmail)
 	}
 

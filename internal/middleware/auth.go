@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"go-product-api/internal/crypto"
 	"go-product-api/internal/repository"
 	"net/http"
 	"strings"
@@ -109,9 +110,8 @@ func LoginHandler(userRepo repository.UserRepository) http.HandlerFunc {
 			return
 		}
 
-		// TODO: Добавить хеширование паролей!
-		// Пока просто сравниваем в открытом виде (НЕ ДЛЯ ПРОДАКШЕНА!)
-		if user.Password != password {
+		// Проверяем пароль с использованием хеша
+		if !crypto.CheckPasswordHash(password, user.Password) {
 			fmt.Printf("❌ Invalid password for: %s\n", email)
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return

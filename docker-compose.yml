@@ -5,6 +5,8 @@ services:
     build: .
     ports:
       - "0.0.0.0:8080:8080"
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
@@ -34,6 +36,31 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
+  # Просмотр БД
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=secure_password
+    ports:
+      - "0.0.0.0:8081:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  # Тестово для себя
+  portainer:
+    image: portainer/portainer-ce
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
 volumes:
   postgres_data:
   redis_data:
+  pgadmin_data:
+  portainer_data:
